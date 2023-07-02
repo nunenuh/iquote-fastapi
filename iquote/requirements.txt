@@ -11,3 +11,6 @@ flake8==6.0.0
 black==23.1.0
 isort==5.12.0
 pydantic[email]
+fastapi-healthcheck==0.2.12
+fastapi-healthcheck-sqlalchemy==0.1.0
+fastapi-healthcheck-uri==0.1.0
