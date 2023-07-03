@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from app.core.config import Settings, get_settings, settings
-from app.models.user import User
+from core.config import Settings, get_settings, settings
+from models.user import User
 
 from fastapi_healthcheck import HealthCheckFactory, healthCheckRoute
 from fastapi_healthcheck_sqlalchemy import HealthCheckSQLAlchemy

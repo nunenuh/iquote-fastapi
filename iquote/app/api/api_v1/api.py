@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.api_v1.endpoints import ping, health
+from api.api_v1.endpoints import ping, health
 
 api_router = APIRouter()
 api_router.include_router(ping.router, tags=["ping"])

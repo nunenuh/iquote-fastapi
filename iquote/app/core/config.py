@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    SERVER_NAME: str = config_env("DOMAIN")
-    SERVER_HOST: AnyHttpUrl = config_env("SERVER_HOST")
+    SERVER_NAME: str = config_env("DOMAIN", default="localhost")
+    SERVER_HOST: AnyHttpUrl = config_env("SERVER_HOST", default="localhost")
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
@@ -58,15 +58,17 @@ class Settings(BaseSettings):
     #         return None
     #     return v
 
-    POSTGRES_SERVER: str = config_env("POSTGRES_SERVER")
+    POSTGRES_HOST: str = config_env("POSTGRES_HOST")
+    POSTGRES_PORT: str = config_env("POSTGRES_PORT", default="5432")
     POSTGRES_USER: str = config_env("POSTGRES_USER")
-    POSTGRES_PASSWORD: str = config_env("POSTGRES_PASSWORD")
+    POSTGRES_PASS: str = config_env("POSTGRES_PASS")
     POSTGRES_DB: str = config_env("POSTGRES_DB")
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = PostgresDsn.build(
             scheme="postgresql",
             user=POSTGRES_USER,
-            password=POSTGRES_PASSWORD,
-            host=POSTGRES_SERVER,
+            password=POSTGRES_PASS,
+            host=POSTGRES_HOST,
+            port=POSTGRES_PORT,
             path=f"/{POSTGRES_DB or ''}",
         )
     print(SQLALCHEMY_DATABASE_URI)

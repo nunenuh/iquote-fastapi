@@ -21,7 +21,7 @@ def test_health_live(test_app):
 
     # When
     response = test_app.get("api/v1/health/live")
-
+    
     # Then
     assert response.status_code == 200
     assert response.json() == {"status":"OK"}
