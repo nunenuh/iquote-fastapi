@@ -2,6 +2,7 @@
 
 from fastapi.testclient import TestClient
 
+
 def test_health_full(client: TestClient):
     # Given
     # test_app
@@ -12,7 +13,8 @@ def test_health_full(client: TestClient):
 
     # Then
     assert response.status_code == 200
-    assert response_json['status'] == "Healthy"
+    assert response_json["status"] == "Healthy"
+
 
 def test_health_live(client: TestClient):
     # Given
@@ -20,10 +22,10 @@ def test_health_live(client: TestClient):
 
     # When
     response = client.get("api/v1/health/live")
-    
+
     # Then
     assert response.status_code == 200
-    assert response.json() == {"status":"OK"}
+    assert response.json() == {"status": "OK"}
 
 
 def test_health_ready(client: TestClient):
@@ -35,8 +37,9 @@ def test_health_ready(client: TestClient):
 
     # Then
     assert response.status_code == 200
-    assert response.json() == {"status":"OK"}
-    
+    assert response.json() == {"status": "OK"}
+
+
 def test_health_started(client: TestClient):
     # Given
     # test_app
@@ -46,4 +49,4 @@ def test_health_started(client: TestClient):
 
     # Then
     assert response.status_code == 200
-    assert response.json() == {"status":"OK"}
+    assert response.json() == {"status": "OK"}

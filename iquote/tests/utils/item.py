@@ -1,9 +1,9 @@
 from typing import Optional
 
-from sqlalchemy.orm import Session
-
-import crud, models
+import crud
+import models
 from schemas.item import ItemCreate
+from sqlalchemy.orm import Session
 from tests.utils.user import create_random_user
 from tests.utils.utils import random_lower_string
 

@@ -1,27 +1,24 @@
 import logging
-from functools import lru_cache
-
-
-
 import secrets
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Union
-from starlette.config import Config
-import json
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
+from starlette.config import Config
 
 config_env = Config(".env")
 
 log = logging.getLogger("uvicorn")
 
+
 class Settings(BaseSettings):
     ENVIRONMENT: str = config_env("ENVIRONMENT", default="development")
     TESTING: bool = config_env("TESTING", default=False)
-    
+
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     VERSION: str = config_env("VERSION", default="0.1.0")
-    
+
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     SERVER_NAME: str = config_env("DOMAIN", default="localhost")
@@ -29,13 +26,12 @@ class Settings(BaseSettings):
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
-    
+
     # data = config_env("BACKEND_CORS_ORIGINS")
     # data = [i.strip() for i in data.split(",")]
     # for d in data:
-    #     print(d)  
-    
-    
+    #     print(d)
+
     BACKEND_CORS_ORIGINS: str = config_env("BACKEND_CORS_ORIGINS")
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
@@ -45,11 +41,9 @@ class Settings(BaseSettings):
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
-    
-
 
     PROJECT_NAME: str = config_env("PROJECT_NAME")
-    
+
     # SENTRY_DSN: Optional[HttpUrl] = None
 
     # @validator("SENTRY_DSN", pre=True)
@@ -64,13 +58,13 @@ class Settings(BaseSettings):
     POSTGRES_PASS: str = config_env("POSTGRES_PASS")
     POSTGRES_DB: str = config_env("POSTGRES_DB")
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = PostgresDsn.build(
-            scheme="postgresql",
-            user=POSTGRES_USER,
-            password=POSTGRES_PASS,
-            host=POSTGRES_HOST,
-            port=POSTGRES_PORT,
-            path=f"/{POSTGRES_DB or ''}",
-        )
+        scheme="postgresql",
+        user=POSTGRES_USER,
+        password=POSTGRES_PASS,
+        host=POSTGRES_HOST,
+        port=POSTGRES_PORT,
+        path=f"/{POSTGRES_DB or ''}",
+    )
     print(SQLALCHEMY_DATABASE_URI)
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
@@ -84,7 +78,6 @@ class Settings(BaseSettings):
             host=values.get("POSTGRES_SERVER"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
-        
 
     SMTP_TLS: bool = True
     SMTP_PORT: Optional[int] = None
@@ -123,9 +116,11 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+
 @lru_cache()
 def get_settings() -> BaseSettings:
     log.info("Loading config settings from the environment...")
-    return Settings()
+    return settings
+
 
 # print(settings.SQLALCHEMY_DATABASE_URI)

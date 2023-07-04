@@ -1,9 +1,9 @@
-from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
+import logging
 
 from api.api_v1.api import api_router
 from core.config import settings
-import logging
+from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
 log = logging.getLogger("uvicorn")
 
@@ -21,9 +21,9 @@ def create_application() -> FastAPI:
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        
+
     application.include_router(api_router, prefix=settings.API_V1_STR)
-   
+
     return application
 
 

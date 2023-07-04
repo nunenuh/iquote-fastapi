@@ -1,11 +1,9 @@
 from __future__ import with_statement
 
-import os
+from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from logging.config import fileConfig
-
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,8 +19,8 @@ fileConfig(config.config_file_name)
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
 
-from db.base import Base  # noqa
 from core.config import settings
+from db.base import Base  # noqa
 
 target_metadata = Base.metadata
 
@@ -33,11 +31,11 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    # user = os.getenv("POSTGRES_USER", "postgres") 
+    # user = os.getenv("POSTGRES_USER", "postgres")
     # password = os.getenv("POSTGRES_PASSWORD", "")
     # server = os.getenv("POSTGRES_SERVER", "localhost")
     # db = os.getenv("POSTGRES_DB", "db")
-    
+
     user = settings.POSTGRES_USER
     password = settings.POSTGRES_PASS
     host = settings.POSTGRES_HOST
@@ -77,7 +75,9 @@ def run_migrations_online():
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
-        configuration, prefix="sqlalchemy.", poolclass=pool.NullPool,
+        configuration,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
     )
 
     with connectable.connect() as connection:
