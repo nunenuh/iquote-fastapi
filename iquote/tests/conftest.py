@@ -15,9 +15,11 @@ def get_settings_override():
     settings.TESTING = True
     return settings
 
+
 @pytest.fixture(scope="session")
 def db() -> Generator:
     yield SessionLocal()
+
 
 @pytest.fixture(scope="module")
 def client() -> Generator:
@@ -25,9 +27,11 @@ def client() -> Generator:
     with TestClient(app) as c:
         yield c
 
+
 @pytest.fixture(scope="module")
 def superuser_token_headers(client: TestClient) -> Dict[str, str]:
     return get_superuser_token_headers(client)
+
 
 @pytest.fixture(scope="module")
 def normal_user_token_headers(client: TestClient, db: Session) -> Dict[str, str]:
