@@ -1,14 +1,15 @@
 # project/tests/test_ping.py
 
-from app import main
+# from app import main
+from fastapi.testclient import TestClient
 
 
-def test_ping(test_app):
+def test_ping(client: TestClient):
     # Given
     # test_app
 
     # When
-    response = test_app.get("api/v1/ping")
+    response = client.get("api/v1/ping")
 
     # Then
     assert response.status_code == 200
