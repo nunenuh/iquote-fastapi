@@ -8,6 +8,8 @@ black==23.1.0
 celery==5.2.2
 email-validator==1.0.5
 emails==0.6
+
+Faker==18.11.2
 fastapi==0.95.2
 
 fastapi-healthcheck==0.2.12
