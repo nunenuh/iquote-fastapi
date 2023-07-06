@@ -28,6 +28,16 @@ def test_get_quote_author(db: Session) -> None:
     assert jsonable_encoder(quote_author) == jsonable_encoder(quote_author_2)
 
 
+def test_get_quote_author_by_name(db: Session) -> None:
+    name = _fake.name()
+    quote_author_in = QuoteAuthorCreate(name=name)
+    quote_author = crud.quote_author.create(db, obj_in=quote_author_in)
+    quote_author_2 = crud.quote_author.get_by_name(db, name=quote_author.name)
+    assert quote_author_2
+    assert quote_author.name == quote_author_2.name
+    assert jsonable_encoder(quote_author) == jsonable_encoder(quote_author_2)
+
+
 def test_update_quote_author(db: Session) -> None:
     name = _fake.name()
     quote_author_in = QuoteAuthorCreate(name=name)
