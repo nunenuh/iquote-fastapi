@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 from crud.base import CRUDBase
 from models.quote import QuoteAuthor
@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 
 
 class CRUDQuoteAuthor(CRUDBase[QuoteAuthor, QuoteAuthorCreate, QuoteAuthorUpdate]):
+    def get_by_name(self, db: Session, *, name: str) -> Optional[QuoteAuthor]:
+        return db.query(QuoteAuthor).filter(QuoteAuthor.name == name).first()
+
     def create(self, db: Session, *, obj_in: QuoteAuthorCreate) -> QuoteAuthor:
         db_obj = QuoteAuthor(name=obj_in.name)
         db.add(db_obj)
