@@ -35,5 +35,7 @@ python-multipart==0.0.5
 raven==6.10.0
 requests==2.31.0
 sqlalchemy==2.0.17
+
+stripe==5.4.0
 tenacity==8.2.2
 uvicorn==0.21.1

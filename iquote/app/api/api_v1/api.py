@@ -3,6 +3,7 @@ from api.api_v1.endpoints import (
     login,
     ping,
     quote_author,
+    quote_categories,
     users,
     utils,
 )
@@ -16,6 +17,9 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(utils.router, prefix="/utils", tags=["utils"])
 api_router.include_router(
     quote_author.router, prefix="/quote/author", tags=["quote_author"]
+)
+api_router.include_router(
+    quote_categories.router, prefix="/quote/categories", tags=["quote_categories"]
 )
 
 
