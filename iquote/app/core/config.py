@@ -3,7 +3,14 @@ import secrets
 from functools import lru_cache
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
+from pydantic import (
+    AnyHttpUrl,
+    ConfigDict,
+    EmailStr,
+    PostgresDsn,
+    field_validator,
+)
+from pydantic_settings import BaseSettings
 from starlette.config import Config
 
 config_env = Config(".env")
@@ -34,7 +41,8 @@ class Settings(BaseSettings):
 
     BACKEND_CORS_ORIGINS: str = config_env("BACKEND_CORS_ORIGINS")
 
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
@@ -57,27 +65,17 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = config_env("POSTGRES_USER")
     POSTGRES_PASS: str = config_env("POSTGRES_PASS")
     POSTGRES_DB: str = config_env("POSTGRES_DB")
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = PostgresDsn.build(
-        scheme="postgresql",
-        user=POSTGRES_USER,
-        password=POSTGRES_PASS,
-        host=POSTGRES_HOST,
-        port=POSTGRES_PORT,
-        path=f"/{POSTGRES_DB or ''}",
-    )
+    CONN_STR: str = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASS}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = PostgresDsn(CONN_STR)
     print(SQLALCHEMY_DATABASE_URI)
 
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
+    @field_validator("SQLALCHEMY_DATABASE_URI")
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
-        return PostgresDsn.build(
-            scheme="postgresql",
-            user=values.get("POSTGRES_USER"),
-            password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
-            path=f"/{values.get('POSTGRES_DB') or ''}",
-        )
+        return PostgresDsn(values.data.get("CONN_STR"))
 
     SMTP_TLS: bool = True
     SMTP_PORT: Optional[int] = None
@@ -87,31 +85,33 @@ class Settings(BaseSettings):
     EMAILS_FROM_EMAIL: Optional[EmailStr] = None
     EMAILS_FROM_NAME: Optional[str] = None
 
-    @validator("EMAILS_FROM_NAME")
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
+    @field_validator("EMAILS_FROM_NAME")
     def get_project_name(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
-            return values["PROJECT_NAME"]
+            return values.data.get("PROJECT_NAME")
         return v
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
     EMAIL_TEMPLATES_DIR: str = "/app/app/email-templates/build"
     EMAILS_ENABLED: bool = False
 
-    @validator("EMAILS_ENABLED", pre=True)
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
+    @field_validator("EMAILS_ENABLED")
     def get_emails_enabled(cls, v: bool, values: Dict[str, Any]) -> bool:
         return bool(
-            values.get("SMTP_HOST")
-            and values.get("SMTP_PORT")
-            and values.get("EMAILS_FROM_EMAIL")
+            values.data.get("SMTP_HOST")
+            and values.data.get("SMTP_PORT")
+            and values.data.get("EMAILS_FROM_EMAIL")
         )
 
     EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
     FIRST_SUPERUSER: EmailStr = config_env("FIRST_SUPERUSER")
     FIRST_SUPERUSER_PASSWORD: str = config_env("FIRST_SUPERUSER_PASSWORD")
     USERS_OPEN_REGISTRATION: bool = False
-
-    class Config:
-        case_sensitive = True
+    model_config = ConfigDict(case_sensitive=True)
 
 
 settings = Settings()

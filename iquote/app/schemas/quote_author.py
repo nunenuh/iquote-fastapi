@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 # Shared properties
@@ -20,9 +20,7 @@ class QuoteAuthorUpdate(QuoteAuthorBase):
 
 class QuoteAuthorInDBBase(QuoteAuthorBase):
     id: Optional[int] = None
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Additional properties to return via API
