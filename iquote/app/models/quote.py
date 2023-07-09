@@ -23,6 +23,7 @@ class QuoteAuthor(Base):
 
     # Soft delete column
     is_deleted = Column(Boolean, server_default=expression.false())
+    quotes = relationship("Quote", back_populates="authors")
 
 
 class QuoteCategories(Base):
@@ -32,6 +33,29 @@ class QuoteCategories(Base):
     name = Column(String, index=True)
     parent_id = Column(Integer, ForeignKey("quote_categories.id"))
     children = relationship("QuoteCategories")
+
+    # TIMESTAMP is used here to store timezone aware datetimes
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    updated_at = Column(
+        TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    deleted_at = Column(TIMESTAMP(timezone=True))
+
+    # Soft delete column
+    is_deleted = Column(Boolean, server_default=expression.false())
+    quotes = relationship("Quote", back_populates="categories")
+
+
+class Quote(Base):
+    __tablename__ = "quote"
+
+    id = Column(Integer, primary_key=True, index=True)
+    text = Column(String, index=True)
+    tags = Column(String, index=True)
+    author_id = Column(Integer, ForeignKey("quote_author.id"))
+    authors = relationship("QuoteAuthor", back_populates="quotes")
+    categories_id = Column(Integer, ForeignKey("quote_categories.id"))
+    categories = relationship("QuoteCategories", back_populates="quotes")
 
     # TIMESTAMP is used here to store timezone aware datetimes
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())

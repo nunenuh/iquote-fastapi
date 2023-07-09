@@ -2,6 +2,7 @@ from api.api_v1.endpoints import (
     health,
     login,
     ping,
+    quote,
     quote_author,
     quote_categories,
     users,
@@ -21,6 +22,6 @@ api_router.include_router(
 api_router.include_router(
     quote_categories.router, prefix="/quote/categories", tags=["quote_categories"]
 )
-
+api_router.include_router(quote.router, prefix="/quote", tags=["quote"])
 
 # api_router.include_router(items.router, prefix="/items", tags=["items"])
