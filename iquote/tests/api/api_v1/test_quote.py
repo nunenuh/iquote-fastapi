@@ -68,7 +68,7 @@ def test_create_quote_with_categories_and_author(
         "text": _fake.sentence(),
         "tags": f"{_fake.words()},{_fake.words()},{_fake.words()}",
         "author_id": random.randint(1, 5),
-        "categories": random.randint(1, 5),
+        "categories": [random.randint(1, 5)],
     }
 
     response = client.post(
@@ -105,31 +105,27 @@ def test_update_quote_with_author_categories(
 ) -> None:
     quote_id = 1
     new_text = _fake.sentence()
-    new_tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
-    new_author_id = int(random.randint(1, 5))
-    new_categories_id = int(random.randint(1, 5))
-
+    new_tags = ",".join([_fake.word() for _ in range(3)])
+    new_author_id = random.randint(1, 5)
+    new_category_id = random.randint(1, 5)
     data = {
         "text": new_text,
         "tags": new_tags,
         "author_id": new_author_id,
-        "categories_id": new_categories_id,
+        "categories": [new_category_id],
     }
-
     response = client.put(
         f"{settings.API_V1_STR}/quote/{quote_id}",
         headers=superuser_token_headers,
         json=data,
     )
-
-    assert response.status_code == 200
     content = response.json()
-    assert "id" in content
+    assert response.status_code == 200
     assert content["id"] == quote_id
     assert content["text"] == new_text
     assert content["tags"] == new_tags
     assert content["author_id"] == new_author_id
-    assert content["categories_id"] == new_categories_id
+    assert content["categories"][0]["id"] == new_category_id
 
 
 def test_delete_quote(
