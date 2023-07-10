@@ -1,12 +1,12 @@
 from typing import Dict
 
-import crud
-from core.config import settings
 from fastapi.testclient import TestClient
-from models.user import User
-from schemas.user import UserCreate, UserUpdate
 from sqlalchemy.orm import Session
 
+import crud
+from core.config import settings
+from models.user import User
+from schemas.user import UserCreate, UserUpdate
 from tests.utils.utils import random_email, random_lower_string
 
 
