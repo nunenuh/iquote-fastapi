@@ -1,9 +1,9 @@
-import crud
-from core.security import verify_password
 from fastapi.encoders import jsonable_encoder
-from schemas.user import UserCreate, UserUpdate
 from sqlalchemy.orm import Session
 
+import crud
+from core.security import verify_password
+from schemas.user import UserCreate, UserUpdate
 from tests.utils.utils import random_email, random_lower_string
 
 
