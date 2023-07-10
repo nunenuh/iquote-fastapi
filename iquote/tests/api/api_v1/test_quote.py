@@ -68,7 +68,7 @@ def test_create_quote_with_categories_and_author(
         "text": _fake.sentence(),
         "tags": f"{_fake.words()},{_fake.words()},{_fake.words()}",
         "author_id": random.randint(1, 5),
-        "categories_id": random.randint(1, 5),
+        "categories": random.randint(1, 5),
     }
 
     response = client.post(

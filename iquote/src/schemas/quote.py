@@ -15,12 +15,12 @@ class QuoteBase(BaseModel):
 
 # Properties to receive via API on creation
 class QuoteCreate(QuoteBase):
-    pass
+    categories: List[int] = []
 
 
 # Properties to receive via API on update
 class QuoteUpdate(QuoteBase):
-    pass
+    categories: List[int] = []
 
 
 class QuoteInDBBase(QuoteBase):

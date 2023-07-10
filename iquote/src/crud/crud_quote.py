@@ -42,6 +42,26 @@ class CRUDQuote(CRUDBase[Quote, QuoteCreate, QuoteUpdate]):
     def create(self, db: Session, *, obj_in: QuoteCreate) -> Quote:
         # retrieve or create categories first
         category_objs = []
+        for category_id in obj_in.categories:
+            category = db.query(Categories).filter(Categories.id == category_id).first()
+            if category:
+                category_objs.append(category)
+
+        # create quote with categories
+        quote_obj = Quote(
+            text=obj_in.text,
+            tags=obj_in.tags,
+            author_id=obj_in.author_id,
+            categories=category_objs,
+        )
+        db.add(quote_obj)
+        db.commit()
+        db.refresh(quote_obj)
+        return quote_obj
+
+    def create_with_new_categories(self, db: Session, *, obj_in: QuoteCreate) -> Quote:
+        # retrieve or create categories first
+        category_objs = []
         for category_in in obj_in.categories:
             category = (
                 db.query(Categories).filter(Categories.id == category_in.id).first()
@@ -77,16 +97,12 @@ class CRUDQuote(CRUDBase[Quote, QuoteCreate, QuoteUpdate]):
 
         # Update categories
         category_objs = []
-        for category_in in obj_in.categories:
+        for categories_id in obj_in.categories:
             category = (
-                db.query(Categories).filter(Categories.id == category_in.id).first()
+                db.query(Categories).filter(Categories.id == categories_id).first()
             )
-            if not category:
-                category = Categories(name=category_in.name)
-                db.add(category)
-                db.commit()
-                db.refresh(category)
-            category_objs.append(category)
+            if category:
+                category_objs.append(category)
 
         # Add the new categories
         db_obj.categories.extend(category_objs)

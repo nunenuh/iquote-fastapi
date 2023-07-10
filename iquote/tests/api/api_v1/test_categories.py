@@ -9,7 +9,7 @@ from core.config import settings
 _fake = faker.Faker()
 
 
-def test_get_quote_categories_list(
+def test_get_categories_list(
     client: TestClient, normal_user_token_headers: Dict[str, str], db: Session
 ) -> None:
     r = client.get(
@@ -25,7 +25,7 @@ def test_get_quote_categories_list(
     assert rjson[0]["id"]
 
 
-def test_get_quote_categories(
+def test_get_categories(
     client: TestClient,
 ) -> None:
     categories_id = 1
@@ -58,7 +58,7 @@ def test_get_quote_category_by_name(
 def test_get_quote_category_by_parent_id(
     client: TestClient,
 ) -> None:
-    parent_id = 1
+    parent_id = 15
     r = client.get(
         f"{settings.API_V1_STR}/categories/parent/{parent_id}"
         # headers=normal_user_token_headers
@@ -67,10 +67,11 @@ def test_get_quote_category_by_parent_id(
     assert r.status_code == 200
     rjson = r.json()
     assert rjson
-    assert rjson["parent_id"] == parent_id
+    assert type(rjson) == list
+    assert rjson[0]["parent_id"] == parent_id
 
 
-def test_create_quote_categories(
+def test_create_categories(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
     data = {"name": _fake.name()}
@@ -85,7 +86,7 @@ def test_create_quote_categories(
     assert "id" in content
 
 
-def test_update_quote_categories(
+def test_update_categories(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
     categories_id = 1
@@ -102,7 +103,7 @@ def test_update_quote_categories(
     assert content["id"] == categories_id
 
 
-def test_delete_quote_categories(
+def test_delete_categories(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
     data = {"name": _fake.name()}
