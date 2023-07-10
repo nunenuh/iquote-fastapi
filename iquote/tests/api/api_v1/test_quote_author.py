@@ -1,9 +1,10 @@
 from typing import Dict
 
 import faker
-from core.config import settings
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+
+from core.config import settings
 
 _fake = faker.Faker()
 
