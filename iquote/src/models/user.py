@@ -8,6 +8,7 @@ from db.base_class import Base
 if TYPE_CHECKING:
     from .item import Item  # noqa: F401
 
+
 likes = Table(
     "user_like_quote",
     Base.metadata,

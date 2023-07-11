@@ -8,6 +8,7 @@ import crud
 from schemas.author import Author, AuthorCreate
 from schemas.categories import Categories, CategoriesCreate
 from schemas.quote import QuoteCreate, QuoteUpdate
+from schemas.user import UserCreate
 
 # from tests.utils.utils import random_email, random_lower_string
 
@@ -276,3 +277,30 @@ def test_delete_quote(db: Session):
     assert deleted_quote.id == quote.id
     assert deleted_quote.text == quote.text
     assert jsonable_encoder(quote) == jsonable_encoder(deleted_quote)
+
+
+def test_user_like_quote(db: Session):
+    quote_in = QuoteCreate(
+        text=_fake.sentence(), tags="word", categories_id=1, author_id=1
+    )
+    quote = crud.quote.create(db, obj_in=quote_in)
+    user = UserCreate(name=_fake.name(), email=_fake.email(), password="Test123!")
+    user = crud.user.create(db, obj_in=user)
+    crud.quote.like(db, quote=quote, user=user)
+    liked_quote = crud.quote.get(db, id=quote.id)
+    assert user in liked_quote.users_who_liked
+
+
+def test_user_unlike_quote(db: Session):
+    quote_in = QuoteCreate(
+        text=_fake.sentence(), tags="word", categories_id=1, author_id=1
+    )
+    quote = crud.quote.create(db, obj_in=quote_in)
+
+    user = UserCreate(name=_fake.name(), email=_fake.email(), password="Test123!")
+    user = crud.user.create(db, obj_in=user)
+
+    crud.quote.like(db, quote=quote, user=user)
+    crud.quote.unlike(db, quote=quote, user=user)
+    unliked_quote = crud.quote.get(db, id=quote.id)
+    assert user not in unliked_quote.users_who_liked
