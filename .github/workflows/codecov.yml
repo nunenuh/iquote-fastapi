@@ -25,7 +25,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        cp .env.example .env
+        cp .env.sample .env
         poetry run make run-test
         poetry run make run-test-cov
       working-directory: iquote
