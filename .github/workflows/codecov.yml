@@ -25,6 +25,7 @@ jobs:
 
     - name: Test with pytest
       run: |
+        poetry shell
         make run-test
         make run-test-cov
       working-directory: iquote
