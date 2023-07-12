@@ -220,33 +220,48 @@ def test_update_quote(db: Session):
 
 
 def test_update_author_and_categories(db: Session):
+    def get_author(author_id):
+        return crud.author.get(db, id=author_id)
+
+    def get_category(category_id):
+        return crud.categories.get(db, id=category_id)
+
+    def create_quote_with_author_and_category(author_id, category_id):
+        author = get_author(author_id)
+        category = get_category(category_id)
+        return create_quote(author.id, [category.id])
+
+    def create_quote_update_with_author_and_category(author_id, category_id):
+        new_author = get_author(author_id)
+        new_category = get_category(category_id)
+        return create_quote_update(author_id=new_author.id, cat=[new_category.id])
+
+    def assert_quote_updated(
+        quote_updated, quote_update_in, new_author_id, new_category_id
+    ):
+        assert quote_updated.text == quote_update_in.text
+        assert quote_updated.tags == quote_update_in.tags
+        assert quote_updated.authors.id == new_author_id
+        assert quote_updated.categories[0].id == new_category_id
+
     author_id = 1
     category_id = 1
 
-    author = crud.author.get(db, id=author_id)
-    categories = crud.categories.get(db, id=category_id)
-
-    quote_in = create_quote(author.id, [categories.id])
-
+    quote_in = create_quote_with_author_and_category(author_id, category_id)
     quote_created = crud.quote.create(db, obj_in=quote_in)
     quote_retrieved = crud.quote.get(db, id=quote_created.id)
 
-    new_author_id = 2
-    new_category_id = 2
+    new_author_id = 3
+    new_category_id = 3
 
-    new_author = crud.author.get(db, id=new_author_id)
-    new_categories = crud.categories.get(db, id=new_category_id)
-
-    quote_update_in = create_quote_update(new_author.id, [new_categories.id])
-
+    quote_update_in = create_quote_update_with_author_and_category(
+        new_author_id, new_category_id
+    )
     quote_updated = crud.quote.update(
         db, db_obj=quote_retrieved, obj_in=quote_update_in
     )
 
-    assert quote_updated.text == quote_update_in.text
-    assert quote_updated.tags == quote_update_in.tags
-    assert quote_updated.authors.id == new_author_id
-    assert quote_updated.categories[0].id == new_category_id
+    assert_quote_updated(quote_updated, quote_update_in, new_author_id, new_category_id)
 
 
 def create_quote(author_id: int, cat: List[Categories]) -> QuoteCreate:

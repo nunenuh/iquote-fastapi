@@ -9,37 +9,6 @@ from core.config import settings
 _fake = faker.Faker()
 
 
-def test_get_author_list(
-    client: TestClient, normal_user_token_headers: Dict[str, str], db: Session
-) -> None:
-    r = client.get(
-        f"{settings.API_V1_STR}/author/"
-        # headers=normal_user_token_headers
-    )
-
-    assert r.status_code == 200
-    rjson = r.json()
-    assert rjson
-    assert isinstance(rjson, list)
-    assert rjson[0]["name"]
-    assert rjson[0]["id"]
-
-
-def test_get_author(
-    client: TestClient,
-) -> None:
-    author_id = 1
-    r = client.get(
-        f"{settings.API_V1_STR}/author/{author_id}"
-        # headers=normal_user_token_headers
-    )
-
-    assert r.status_code == 200
-    rjson = r.json()
-    assert rjson
-    assert rjson["id"] == author_id
-
-
 def test_create_author(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
@@ -70,6 +39,37 @@ def test_update_author(
     assert content["name"] == data["name"]
     assert "id" in content
     assert content["id"] == author_id
+
+
+def test_get_author_list(
+    client: TestClient, normal_user_token_headers: Dict[str, str], db: Session
+) -> None:
+    r = client.get(
+        f"{settings.API_V1_STR}/author/"
+        # headers=normal_user_token_headers
+    )
+
+    assert r.status_code == 200
+    rjson = r.json()
+    assert rjson
+    assert isinstance(rjson, list)
+    assert rjson[0]["name"]
+    assert rjson[0]["id"]
+
+
+def test_get_author(
+    client: TestClient,
+) -> None:
+    author_id = 1
+    r = client.get(
+        f"{settings.API_V1_STR}/author/{author_id}"
+        # headers=normal_user_token_headers
+    )
+
+    assert r.status_code == 200
+    rjson = r.json()
+    assert rjson
+    assert rjson["id"] == author_id
 
 
 def test_delete_author(
