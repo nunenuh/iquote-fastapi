@@ -9,6 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+        postgres:
+          image: 'bitnami/postgresql:14.8.0'
+          env:
+            POSTGRES_USER: testuser
+            POSTGRES_PASSWORD: testpass
+            POSTGRES_DB: iquote_fastapi
+          ports:
+            - 5432:5432
+          options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.10
@@ -25,7 +35,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        cp .env.sample .env
+        cp .env.test .env
         poetry run make run-test
         poetry run make run-test-cov
       working-directory: iquote
