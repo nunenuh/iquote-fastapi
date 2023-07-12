@@ -25,14 +25,14 @@ class CRUDCategories(CRUDBase[Categories, CategoriesCreate, CategoriesUpdate]):
     def create_by_parent(
         self, db: Session, parent_id: int, obj_in: CategoriesCreate
     ) -> Categories:
-        db_obj = Categories(**obj_in.dict(), parent_id=parent_id)
+        db_obj = Categories(**obj_in.model_dump(), parent_id=parent_id)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
         return db_obj
 
     def create(self, db: Session, *, obj_in: CategoriesCreate) -> Categories:
-        db_obj = Categories(name=obj_in.name)
+        db_obj = Categories(**obj_in.model_dump())
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -48,7 +48,7 @@ class CRUDCategories(CRUDBase[Categories, CategoriesCreate, CategoriesUpdate]):
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
-            update_data = obj_in.dict(exclude_unset=True)
+            update_data = obj_in.model_dump(exclude_unset=True)
 
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 

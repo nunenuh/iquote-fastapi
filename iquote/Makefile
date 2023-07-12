@@ -1,3 +1,8 @@
+.PHONY: venv
+
+venv:
+	@echo "Activating virtual environment"
+	@source venv/bin/activate
 
 run-server:
 	PYTHONPATH=src uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000
@@ -11,7 +16,8 @@ endif
 
 
 run-test-cov:
-	PYTHONPATH=src pytest --cov=src --cov-report=term-missing
+	PYTHONPATH=src pytest --cov=src --cov-report=term-missing --cov-report=xml:coverage.xml
+	# PYTHONPATH=src coverage report
 
 db-migrate:
 	PYTHONPATH=src alembic revision --autogenerate

@@ -63,7 +63,7 @@ def read_categories_by_id(
     return categories
 
 
-@router.get("/parent/id/{category_id}", response_model=schemas.Categories)
+@router.get("/parent/{category_id}", response_model=List[schemas.Categories])
 def read_categories_by_id(
     category_id: int,
     # current_user: models.User = Depends(deps.get_current_active_user),

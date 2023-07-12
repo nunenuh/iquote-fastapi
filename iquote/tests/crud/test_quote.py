@@ -8,6 +8,7 @@ import crud
 from schemas.author import Author, AuthorCreate
 from schemas.categories import Categories, CategoriesCreate
 from schemas.quote import QuoteCreate, QuoteUpdate
+from schemas.user import UserCreate
 
 # from tests.utils.utils import random_email, random_lower_string
 
@@ -56,7 +57,7 @@ def test_create_quote_with_categories(db: Session) -> None:
     quote_in = QuoteCreate(
         text=text,
         tags=tags,
-        categories=[category_1, category_2],
+        categories=[category_1.id, category_2.id],
     )
 
     quote = crud.quote.create(db, obj_in=quote_in)
@@ -95,7 +96,7 @@ def test_create_quote_with_author_and_categories(db: Session) -> None:
         text=text,
         tags=tags,
         author_id=author.id,
-        categories=[category_1, category_2],
+        categories=[category_1.id, category_2.id],
     )
 
     quote = crud.quote.create(db, obj_in=quote_in)
@@ -167,19 +168,16 @@ def test_get_quote_by_author_name(db: Session):
 
 
 def test_get_quote_by_categories_id(db: Session):
-    text = _fake.sentence()
     category_name = _fake.name()
-
     categories_in = CategoriesCreate(name=category_name)
     categories = crud.categories.create(db, obj_in=categories_in)
-    assert categories
     assert categories.name == category_name
 
-    tags = ",".join([_fake.word() for _ in range(3)])
-    quote_in = QuoteCreate(text=text, tags=tags, categories=[categories])
+    quote_text = _fake.sentence()
+    tags = ",".join(_fake.word() for _ in range(3))
+    quote_in = QuoteCreate(text=quote_text, tags=tags, categories=[categories.id])
     quote = crud.quote.create(db, obj_in=quote_in)
     quote_2 = crud.quote.get_by_categories_id(db, categories_id=categories.id)
-    assert quote_2
     assert quote.text == quote_2.text
     assert jsonable_encoder(quote) == jsonable_encoder(quote_2)
 
@@ -228,7 +226,7 @@ def test_update_author_and_categories(db: Session):
     author = crud.author.get(db, id=author_id)
     categories = crud.categories.get(db, id=category_id)
 
-    quote_in = create_quote(author.id, [categories])
+    quote_in = create_quote(author.id, [categories.id])
 
     quote_created = crud.quote.create(db, obj_in=quote_in)
     quote_retrieved = crud.quote.get(db, id=quote_created.id)
@@ -239,7 +237,7 @@ def test_update_author_and_categories(db: Session):
     new_author = crud.author.get(db, id=new_author_id)
     new_categories = crud.categories.get(db, id=new_category_id)
 
-    quote_update_in = create_quote_update(new_author.id, [new_categories])
+    quote_update_in = create_quote_update(new_author.id, [new_categories.id])
 
     quote_updated = crud.quote.update(
         db, db_obj=quote_retrieved, obj_in=quote_update_in
@@ -279,3 +277,30 @@ def test_delete_quote(db: Session):
     assert deleted_quote.id == quote.id
     assert deleted_quote.text == quote.text
     assert jsonable_encoder(quote) == jsonable_encoder(deleted_quote)
+
+
+def test_user_like_quote(db: Session):
+    quote_in = QuoteCreate(
+        text=_fake.sentence(), tags="word", categories_id=1, author_id=1
+    )
+    quote = crud.quote.create(db, obj_in=quote_in)
+    user = UserCreate(name=_fake.name(), email=_fake.email(), password="Test123!")
+    user = crud.user.create(db, obj_in=user)
+    crud.quote.like(db, quote=quote, user=user)
+    liked_quote = crud.quote.get(db, id=quote.id)
+    assert user in liked_quote.users_who_liked
+
+
+def test_user_unlike_quote(db: Session):
+    quote_in = QuoteCreate(
+        text=_fake.sentence(), tags="word", categories_id=1, author_id=1
+    )
+    quote = crud.quote.create(db, obj_in=quote_in)
+
+    user = UserCreate(name=_fake.name(), email=_fake.email(), password="Test123!")
+    user = crud.user.create(db, obj_in=user)
+
+    crud.quote.like(db, quote=quote, user=user)
+    crud.quote.unlike(db, quote=quote, user=user)
+    unliked_quote = crud.quote.get(db, id=quote.id)
+    assert user not in unliked_quote.users_who_liked
