@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from crud.base import CRUDBase
 from models.quote import Author, Categories, Quote
-from schemas.quote import QuoteCreate, QuoteUpdate
+from schemas.quote import QuoteCreate, QuoteUpdate, QuoteWithLike
 from schemas.user import User
 
 
@@ -112,17 +112,21 @@ class CRUDQuote(CRUDBase[Quote, QuoteCreate, QuoteUpdate]):
         db.refresh(db_obj)
         return db_obj
 
-    def like(self, db: Session, *, user: User, quote: Quote) -> Quote:
+    def like(self, db: Session, *, user: User, quote: Quote) -> QuoteWithLike:
         if user in quote.users_who_liked:
+            quote.liked = True
             return quote
         quote.users_who_liked.append(user)
         db.add(quote)
         db.commit()
         db.refresh(quote)
+        if user in quote.users_who_liked:
+            quote.liked = True
         return quote
 
-    def unlike(self, db: Session, *, user: User, quote: Quote) -> Quote:
+    def unlike(self, db: Session, *, user: User, quote: Quote) -> QuoteWithLike:
         if user not in quote.users_who_liked:
+            quote.liked = False
             return quote
         quote.users_who_liked.remove(user)
         db.add(quote)

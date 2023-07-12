@@ -128,6 +128,66 @@ def test_update_quote_with_author_categories(
     assert content["categories"][0]["id"] == new_category_id
 
 
+def test_like_quote_normal_user(
+    client: TestClient, normal_user_token_headers: dict, db: Session
+) -> None:
+    quote_id = 10
+    response = client.put(
+        f"{settings.API_V1_STR}/quote/{quote_id}/like",
+        headers=normal_user_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert "id" in content
+    assert content["id"] == quote_id
+    assert content["liked"] == True
+
+
+def test_like_quote_superuser(
+    client: TestClient, superuser_token_headers: dict, db: Session
+) -> None:
+    quote_id = 15
+    response = client.put(
+        f"{settings.API_V1_STR}/quote/{quote_id}/like",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert "id" in content
+    assert content["id"] == quote_id
+    assert content["liked"] == True
+
+
+def test_unlike_quote_normal_user(
+    client: TestClient, normal_user_token_headers: dict, db: Session
+) -> None:
+    quote_id = 1
+    response = client.put(
+        f"{settings.API_V1_STR}/quote/{quote_id}/unlike",
+        headers=normal_user_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert "id" in content
+    assert content["id"] == quote_id
+    assert content["liked"] == False
+
+
+def test_unlike_quote_superuser(
+    client: TestClient, superuser_token_headers: dict, db: Session
+) -> None:
+    quote_id = 2
+    response = client.put(
+        f"{settings.API_V1_STR}/quote/{quote_id}/unlike",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert "id" in content
+    assert content["id"] == quote_id
+    assert content["liked"] == False
+
+
 def test_delete_quote(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:

@@ -6,8 +6,10 @@ from sqlalchemy import (
     String,
     Table,
     func,
+    select,
 )
 from sqlalchemy.dialects.postgresql import TIMESTAMP
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 
@@ -100,3 +102,15 @@ class Quote(Base):
 
     # Soft delete column
     is_deleted = Column(Boolean, server_default=expression.false())
+
+    @hybrid_property
+    def liked_count(self):
+        return len(self.users_who_liked)
+
+    @liked_count.expression
+    def liked_count(cls):
+        return (
+            select([func.count(likes.c.user_id)])
+            .where(likes.c.quote_id == cls.id)
+            .label("liked_count")
+        )
