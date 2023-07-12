@@ -46,6 +46,14 @@ jobs:
           poetry run make run-test-cov
         working-directory: iquote
 
+      - name: List directory contents
+        run: |
+          ls -la iquote/
+
+      - name: Display coverage report
+        run: |
+          cat iquote/coverage.xml
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
