@@ -6,12 +6,15 @@ from sqlalchemy import (
     String,
     Table,
     func,
+    select,
 )
 from sqlalchemy.dialects.postgresql import TIMESTAMP
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 
 from db.base_class import Base
+from models.user import likes
 
 # from sqlalchemy import Column, ForeignKey, Integer, String
 # from sqlalchemy.orm import relationship
@@ -76,10 +79,18 @@ class Quote(Base):
     tags = Column(String, index=True)
     author_id = Column(Integer, ForeignKey("author.id"))
     authors = relationship("Author", back_populates="quotes")
+
     categories = relationship(
         "Categories",
         secondary=quote_category_table,
         back_populates="quotes",
+    )
+
+    # relationship to the "User" model through the "likes" association table
+    users_who_liked = relationship(
+        "User",
+        secondary=likes,
+        back_populates="liked_quotes",
     )
 
     # TIMESTAMP is used here to store timezone aware datetimes
@@ -91,3 +102,15 @@ class Quote(Base):
 
     # Soft delete column
     is_deleted = Column(Boolean, server_default=expression.false())
+
+    @hybrid_property
+    def liked_count(self):
+        return len(self.users_who_liked)
+
+    @liked_count.expression
+    def liked_count(cls):
+        return (
+            select([func.count(likes.c.user_id)])
+            .where(likes.c.quote_id == cls.id)
+            .label("liked_count")
+        )

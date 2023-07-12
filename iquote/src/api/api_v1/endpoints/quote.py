@@ -95,6 +95,41 @@ def create_quote(
     return quote
 
 
+# create for me servive for quote like
+@router.put("/{quote_id}/like", response_model=schemas.QuoteWithLike)
+def like_quote(
+    *,
+    db: Session = Depends(deps.get_db),
+    quote_id: int,
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    quote = crud.quote.get(db, id=quote_id)
+    if not quote:
+        raise HTTPException(
+            status_code=404,
+            detail="The quote with this id does not exist in the system",
+        )
+    quote = crud.quote.like(db, quote=quote, user=current_user)
+    return quote
+
+
+@router.put("/{quote_id}/unlike", response_model=schemas.QuoteWithLike)
+def unlike_quote(
+    *,
+    db: Session = Depends(deps.get_db),
+    quote_id: int,
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    quote = crud.quote.get(db, id=quote_id)
+    if not quote:
+        raise HTTPException(
+            status_code=404,
+            detail="The quote with this id does not exist in the system",
+        )
+    quote = crud.quote.unlike(db, quote=quote, user=current_user)
+    return quote
+
+
 @router.put("/{quote_id}", response_model=schemas.Quote)
 def update_quote(
     *,

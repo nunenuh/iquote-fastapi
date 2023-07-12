@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict
 # Shared properties
 class CategoriesBase(BaseModel):
     name: str
+    parent_id: Optional[int] = None
 
 
 # Properties to receive via API on creation

@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 
 from schemas.categories import Categories as CategoriesSchema
+from schemas.user import User as UserSchema
 
 
 # Shared properties
@@ -15,12 +16,12 @@ class QuoteBase(BaseModel):
 
 # Properties to receive via API on creation
 class QuoteCreate(QuoteBase):
-    pass
+    categories: List[int] = []
 
 
 # Properties to receive via API on update
 class QuoteUpdate(QuoteBase):
-    pass
+    categories: List[int] = []
 
 
 class QuoteInDBBase(QuoteBase):
@@ -30,7 +31,18 @@ class QuoteInDBBase(QuoteBase):
 
 # Additional properties to return via API
 class Quote(QuoteInDBBase):
-    pass
+    users_who_liked: Optional[List[UserSchema]] = []
+    liked_count: int = 0
+
+
+class QuoteLike(Quote):
+    liked: bool = False
+
+
+class QuoteWithLike(Quote):
+    users_who_liked: Optional[List[UserSchema]] = []
+    liked_count: int = 0
+    liked: bool = False
 
 
 # Additional properties stored in DB

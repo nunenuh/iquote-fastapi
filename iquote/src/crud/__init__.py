@@ -1,6 +1,5 @@
 from .crud_author import author
 from .crud_categories import categories
-from .crud_item import item
 from .crud_quote import quote
 from .crud_user import user
 
@@ -11,3 +10,4 @@ from .crud_user import user
 # from schemas.item import ItemCreate, ItemUpdate
 
 # item = CRUDBase[Item, ItemCreate, ItemUpdate](Item)
+# from .crud_item import item
