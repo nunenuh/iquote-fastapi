@@ -8,9 +8,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.10
@@ -23,11 +21,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install poetry
         poetry install
+      working-directory: iquote
 
     - name: Test with pytest
       run: |
         make run-test
         make run-test-cov
+      working-directory: iquote
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
