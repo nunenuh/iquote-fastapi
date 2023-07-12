@@ -21,9 +21,19 @@ run-test-cov:
 
 db-migrate:
 	PYTHONPATH=src alembic revision --autogenerate
+	PYTHONPATH=src alembic upgrade head
 
 db-upgrade:
 	PYTHONPATH=src alembic upgrade head
+
+db-prestart:
+	PYTHONPATH=src python ./src/app_pre_start.py
+	PYTHONPATH=src alembic upgrade head
+	PYTHONPATH=src python ./src/initial_data.py
+
+db-init:
+	PYTHONPATH=src alembic init migrations
+	PYTHONPATH=src alembic revision --autogenerate
 
 run-celery:
 	PYTHONPATH=src celery -A src.worker worker -l info -Q default -c 1
