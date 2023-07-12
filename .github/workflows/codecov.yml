@@ -36,7 +36,7 @@ jobs:
     - name: Test with pytest
       run: |
         cp .env.test .env
-        peotry run prestart.sh
+        poetry run prestart.sh
         poetry run make run-test
         poetry run make run-test-cov
       working-directory: iquote
