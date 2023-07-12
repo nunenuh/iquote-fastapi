@@ -1,0 +1,49 @@
+name: CodeCoverage
+
+on:
+  push:
+    branches: [ "main", "stag", "dev" ]
+  pull_request:
+    branches: [ "main", "stag", "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+        postgres:
+          image: 'bitnami/postgresql:14.8.0'
+          env:
+            POSTGRES_USER: testuser
+            POSTGRES_PASSWORD: testpass
+            POSTGRES_DB: iquote_fastapi
+          ports:
+            - 5432:5432
+        #   options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install
+      working-directory: iquote
+
+    - name: Test with pytest
+      run: |
+        cp .env.test .env
+        poetry run make db-prestart
+        poetry run make run-test
+        poetry run make run-test-cov
+      working-directory: iquote
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}  # not required for public repos
+        files: iquote/coverage.xml  # path to coverage file
+        fail_ci_if_error: true  # optional (default = false)
