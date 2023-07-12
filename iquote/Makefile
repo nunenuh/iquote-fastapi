@@ -16,8 +16,7 @@ endif
 
 
 run-test-cov:
-	PYTHONPATH=src pytest --cov=src --cov-report=term-missing --cov-report=xml:coverage.xml
-	# PYTHONPATH=src coverage report
+	PYTHONPATH=src pytest --cov=src --cov-report=term-missing --cov-report=xml
 
 db-migrate:
 	PYTHONPATH=src alembic revision --autogenerate
