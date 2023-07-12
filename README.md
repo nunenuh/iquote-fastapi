@@ -1,5 +1,7 @@
 ## iquote-fastapi
 
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=nunenuh_iquote-fastapi&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=nunenuh_iquote-fastapi) [![codecov](https://codecov.io/gh/nunenuh/iquote-fastapi/branch/main/graph/badge.svg?token=ZL8944ZGM1)](https://codecov.io/gh/nunenuh/iquote-fastapi) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=nunenuh_iquote-fastapi&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=nunenuh_iquote-fastapi) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=nunenuh_iquote-fastapi&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=nunenuh_iquote-fastapi) [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=nunenuh_iquote-fastapi&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=nunenuh_iquote-fastapi) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=nunenuh_iquote-fastapi&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=nunenuh_iquote-fastapi) [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=nunenuh_iquote-fastapi&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=nunenuh_iquote-fastapi) ![Code Coverage](https://github.com/nunenuh/iquote-fastapi/actions/workflows/codecov.yml/badge.svg?branch=dev)
+
 Short description of your project.
 
 ## Installation
