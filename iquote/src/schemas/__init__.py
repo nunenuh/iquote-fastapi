@@ -1,5 +1,5 @@
 from .author import *
-from .categories import *
+from .category import *
 from .msg import *
 from .quote import *
 from .token import *

@@ -14,61 +14,15 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 
 from db.base_class import Base
-from models.user import likes
-
-# from sqlalchemy import Column, ForeignKey, Integer, String
-# from sqlalchemy.orm import relationship
-
-
-class Author(Base):
-    __tablename__ = "author"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-
-    # TIMESTAMP is used here to store timezone aware datetimes
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
-    updated_at = Column(
-        TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
-    deleted_at = Column(TIMESTAMP(timezone=True))
-
-    # Soft delete column
-    is_deleted = Column(Boolean, server_default=expression.false())
-    quotes = relationship("Quote", back_populates="authors")
-
+from models.user import user_like_quote
 
 # Association table for the many-to-many relationship between Quote and Category
 quote_category_table = Table(
-    "quote_categories",
+    "quote_category",
     Base.metadata,
     Column("quote_id", Integer, ForeignKey("quote.id")),
-    Column("categories_id", Integer, ForeignKey("categories.id")),
+    Column("category_id", Integer, ForeignKey("category.id")),
 )
-
-
-class Categories(Base):
-    __tablename__ = "categories"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    parent_id = Column(Integer, ForeignKey("categories.id"))
-    children = relationship("Categories")
-
-    # TIMESTAMP is used here to store timezone aware datetimes
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
-    updated_at = Column(
-        TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
-    deleted_at = Column(TIMESTAMP(timezone=True))
-
-    # Soft delete column
-    is_deleted = Column(Boolean, server_default=expression.false())
-    quotes = relationship(
-        "Quote",
-        secondary=quote_category_table,
-        back_populates="categories",
-    )
 
 
 class Quote(Base):
@@ -81,7 +35,7 @@ class Quote(Base):
     authors = relationship("Author", back_populates="quotes")
 
     categories = relationship(
-        "Categories",
+        "Category",
         secondary=quote_category_table,
         back_populates="quotes",
     )
@@ -89,9 +43,21 @@ class Quote(Base):
     # relationship to the "User" model through the "likes" association table
     users_who_liked = relationship(
         "User",
-        secondary=likes,
+        secondary=user_like_quote,
         back_populates="liked_quotes",
     )
+
+    @hybrid_property
+    def liked_count(self):
+        return len(self.users_who_liked)
+
+    @liked_count.expression
+    def liked_count(cls):
+        return (
+            select([func.count(user_like_quote.c.user_id)])
+            .where(user_like_quote.c.quote_id == cls.id)
+            .label("liked_count")
+        )
 
     # TIMESTAMP is used here to store timezone aware datetimes
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
@@ -102,15 +68,3 @@ class Quote(Base):
 
     # Soft delete column
     is_deleted = Column(Boolean, server_default=expression.false())
-
-    @hybrid_property
-    def liked_count(self):
-        return len(self.users_who_liked)
-
-    @liked_count.expression
-    def liked_count(cls):
-        return (
-            select([func.count(likes.c.user_id)])
-            .where(likes.c.quote_id == cls.id)
-            .label("liked_count")
-        )

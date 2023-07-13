@@ -1,15 +1,9 @@
-from typing import TYPE_CHECKING
-
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
 from db.base_class import Base
 
-if TYPE_CHECKING:
-    from .item import Item  # noqa: F401
-
-
-likes = Table(
+user_like_quote = Table(
     "user_like_quote",
     Base.metadata,
     Column("user_id", ForeignKey("user.id"), primary_key=True),
@@ -26,10 +20,9 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
-    # items = relationship("Item", back_populates="owner")
 
     liked_quotes = relationship(
         "Quote",
-        secondary=likes,
+        secondary=user_like_quote,
         back_populates="users_who_liked",
     )

@@ -11,8 +11,8 @@ from api import deps
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.Categories])
-def read_categories(
+@router.get("/", response_model=List[schemas.Category])
+async def read_categories(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
@@ -25,8 +25,8 @@ def read_categories(
     return categories
 
 
-@router.get("/{category_id}", response_model=schemas.Categories)
-def read_categories_by_id(
+@router.get("/{category_id}", response_model=schemas.Category)
+async def read_categories_by_id(
     category_id: int,
     # current_user: models.User = Depends(deps.get_current_active_user),
     db: Session = Depends(deps.get_db),
@@ -44,8 +44,8 @@ def read_categories_by_id(
     return categories
 
 
-@router.get("/name/{category_name}", response_model=schemas.Categories)
-def read_categories_by_id(
+@router.get("/name/{category_name}", response_model=schemas.Category)
+async def read_categories_by_id(
     category_name: str,
     # current_user: models.User = Depends(deps.get_current_active_user),
     db: Session = Depends(deps.get_db),
@@ -63,8 +63,8 @@ def read_categories_by_id(
     return categories
 
 
-@router.get("/parent/{category_id}", response_model=List[schemas.Categories])
-def read_categories_by_id(
+@router.get("/parent/{category_id}", response_model=List[schemas.Category])
+async def read_categories_by_id(
     category_id: int,
     # current_user: models.User = Depends(deps.get_current_active_user),
     db: Session = Depends(deps.get_db),
@@ -76,11 +76,11 @@ def read_categories_by_id(
     return categories
 
 
-@router.post("/", response_model=schemas.Categories)
-def create_categories(
+@router.post("/", response_model=schemas.Category)
+async def create_categories(
     *,
     db: Session = Depends(deps.get_db),
-    categories_in: schemas.CategoriesCreate,
+    categories_in: schemas.CategoryCreate,
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     categories = crud.categories.get_by_name(db, name=categories_in.name)
@@ -93,12 +93,12 @@ def create_categories(
     return categories
 
 
-@router.put("/{category_id}", response_model=schemas.Categories)
-def update_categories(
+@router.put("/{category_id}", response_model=schemas.Category)
+async def update_categories(
     *,
     db: Session = Depends(deps.get_db),
     category_id: int,
-    categories_in: schemas.CategoriesUpdate,
+    categories_in: schemas.CategoryUpdate,
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     categories = crud.categories.get(db, id=category_id)
@@ -111,8 +111,8 @@ def update_categories(
     return categories
 
 
-@router.delete("/{category_id}", response_model=schemas.Categories)
-def delete_categories(
+@router.delete("/{category_id}", response_model=schemas.Category)
+async def delete_categories(
     *,
     db: Session = Depends(deps.get_db),
     category_id: int,

@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 import crud
-from schemas.categories import CategoriesCreate
+from schemas.category import CategoryCreate
 
 # from tests.utils.utils import random_email, random_lower_string
 
@@ -12,7 +12,7 @@ _fake = Faker()
 
 def test_create_categories(db: Session) -> None:
     name = _fake.name()
-    categories_in = CategoriesCreate(
+    categories_in = CategoryCreate(
         name=name,
     )
     categories = crud.categories.create(db, obj_in=categories_in)
@@ -21,7 +21,7 @@ def test_create_categories(db: Session) -> None:
 
 def test_get_categories(db: Session) -> None:
     name = _fake.name()
-    categories_in = CategoriesCreate(name=name)
+    categories_in = CategoryCreate(name=name)
     categories = crud.categories.create(db, obj_in=categories_in)
     categories_2 = crud.categories.get(db, id=categories.id)
     assert categories_2
@@ -31,7 +31,7 @@ def test_get_categories(db: Session) -> None:
 
 def test_get_categories_by_name(db: Session) -> None:
     name = _fake.name()
-    categories_in = CategoriesCreate(name=name)
+    categories_in = CategoryCreate(name=name)
     categories = crud.categories.create(db, obj_in=categories_in)
     categories_2 = crud.categories.get_by_name(db, name=categories.name)
     assert categories_2
@@ -41,7 +41,7 @@ def test_get_categories_by_name(db: Session) -> None:
 
 def test_update_categories(db: Session) -> None:
     name = _fake.name()
-    categories_in = CategoriesCreate(name=name)
+    categories_in = CategoryCreate(name=name)
     categories = crud.categories.create(db, obj_in=categories_in)
     categories_2 = crud.categories.get(db, id=categories.id)
     assert categories_2
@@ -51,7 +51,7 @@ def test_update_categories(db: Session) -> None:
 
 def test_delete_categories(db: Session) -> None:
     name = _fake.name()
-    categories_in = CategoriesCreate(name=name)
+    categories_in = CategoryCreate(name=name)
     categories = crud.categories.create(db, obj_in=categories_in)
     categories_2 = crud.categories.remove(db, id=categories.id)
     categories_3 = crud.categories.get(db, id=categories.id)

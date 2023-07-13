@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 import crud
 from schemas.author import Author, AuthorCreate
-from schemas.categories import Categories, CategoriesCreate
+from schemas.category import Category, CategoryCreate
 from schemas.quote import QuoteCreate, QuoteUpdate
 from schemas.user import UserCreate
 
@@ -43,12 +43,8 @@ def test_create_quote_with_categories(db: Session) -> None:
     category_name_1 = _fake.word()
     category_name_2 = _fake.word()
 
-    category_1 = crud.categories.create(
-        db, obj_in=CategoriesCreate(name=category_name_1)
-    )
-    category_2 = crud.categories.create(
-        db, obj_in=CategoriesCreate(name=category_name_2)
-    )
+    category_1 = crud.categories.create(db, obj_in=CategoryCreate(name=category_name_1))
+    category_2 = crud.categories.create(db, obj_in=CategoryCreate(name=category_name_2))
 
     assert category_1.name == category_name_1
     assert category_2.name == category_name_2
@@ -82,14 +78,10 @@ def test_create_quote_with_author_and_categories(db: Session) -> None:
     author = crud.author.create(db, obj_in=AuthorCreate(name=author_name))
     assert author.name == author_name
 
-    category_1 = crud.categories.create(
-        db, obj_in=CategoriesCreate(name=category_name_1)
-    )
+    category_1 = crud.categories.create(db, obj_in=CategoryCreate(name=category_name_1))
     assert category_1.name == category_name_1
 
-    category_2 = crud.categories.create(
-        db, obj_in=CategoriesCreate(name=category_name_2)
-    )
+    category_2 = crud.categories.create(db, obj_in=CategoryCreate(name=category_name_2))
     assert category_2.name == category_name_2
 
     quote_in = QuoteCreate(
@@ -131,7 +123,7 @@ def test_get_quote_with_author_and_categories(db: Session):
     assert author.name == author_name
 
     category_name = _fake.name()
-    categories_in = CategoriesCreate(name=category_name)
+    categories_in = CategoryCreate(name=category_name)
     categories = crud.categories.create(db, obj_in=categories_in)
     assert categories
     assert categories.name == category_name
@@ -169,7 +161,7 @@ def test_get_quote_by_author_name(db: Session):
 
 def test_get_quote_by_categories_id(db: Session):
     category_name = _fake.name()
-    categories_in = CategoriesCreate(name=category_name)
+    categories_in = CategoryCreate(name=category_name)
     categories = crud.categories.create(db, obj_in=categories_in)
     assert categories.name == category_name
 
@@ -188,7 +180,7 @@ def test_update_quote(db: Session):
     author = crud.author.create(db, obj_in=author_in)
 
     category_name = _fake.name()
-    categories_in = CategoriesCreate(name=category_name)
+    categories_in = CategoryCreate(name=category_name)
     categories = crud.categories.create(db, obj_in=categories_in)
 
     text = _fake.sentence()
@@ -264,13 +256,13 @@ def test_update_author_and_categories(db: Session):
     assert_quote_updated(quote_updated, quote_update_in, new_author_id, new_category_id)
 
 
-def create_quote(author_id: int, cat: List[Categories]) -> QuoteCreate:
+def create_quote(author_id: int, cat: List[Category]) -> QuoteCreate:
     text = _fake.sentence()
     tags = f"{_fake.words()},{_fake.words()},{_fake.words()}"
     return QuoteCreate(text=text, tags=tags, author_id=author_id, categories=cat)
 
 
-def create_quote_update(author_id: int, cat: List[Categories]) -> QuoteUpdate:
+def create_quote_update(author_id: int, cat: List[Category]) -> QuoteUpdate:
     new_text = _fake.sentence()
     new_tags = f"{_fake.words()},{_fake.words()},{_fake.words()}"
     return QuoteUpdate(
