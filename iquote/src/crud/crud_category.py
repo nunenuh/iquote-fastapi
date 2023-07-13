@@ -53,4 +53,4 @@ class CRUDCategory(CRUDBase[Category, CategoryCreate, CategoryUpdate]):
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
 
-categories = CRUDCategory(Category)
+category = CRUDCategory(Category)

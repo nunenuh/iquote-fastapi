@@ -1,5 +1,5 @@
 from .crud_author import author
-from .crud_category import categories
+from .crud_category import category
 from .crud_quote import quote
 from .crud_user import user
 

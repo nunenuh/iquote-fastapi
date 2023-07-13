@@ -1,14 +1,19 @@
-from typing import List
-
 from faker import Faker
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 import crud
-from schemas.author import Author, AuthorCreate
-from schemas.category import Category, CategoryCreate
-from schemas.quote import QuoteCreate, QuoteUpdate
+from schemas.quote import QuoteCreate
 from schemas.user import UserCreate
+from tests.utils.quote import (
+    create_random_quote,
+    create_random_quote_with_random_author,
+    create_random_quote_with_random_author_and_category,
+    create_random_quote_with_random_category,
+    update_random_quote,
+    update_random_quote_with_random_author,
+    update_random_quote_with_random_author_and_categories,
+)
 
 # from tests.utils.utils import random_email, random_lower_string
 
@@ -17,91 +22,49 @@ _fake = Faker()
 
 def test_create_quote(db: Session) -> None:
     text = _fake.sentence()
-    quote_in = QuoteCreate(text=text)
-    quote = crud.quote.create(db, obj_in=quote_in)
+    quote = create_random_quote(db, text=text)
     assert quote.text == text
 
 
 def test_create_quote_with_author(db: Session) -> None:
     text = _fake.sentence()
-    author_name = _fake.name()
-    tags = f"{_fake.words()},{_fake.words()},{_fake.words()}"
-    author_in = Author(name=author_name)
-    author_in = crud.author.create(db, obj_in=author_in)
-
-    quote_in = QuoteCreate(text=text, tags=tags, author_is=author_in.id)
-    quote = crud.quote.create(db, obj_in=quote_in)
+    quote, author = create_random_quote_with_random_author(db, text=text)
     assert quote.text == text
-    assert quote
+    assert quote.authors == author
 
 
 def test_create_quote_with_categories(db: Session) -> None:
     text = _fake.sentence()
     tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
-
-    # Create new categories
-    category_name_1 = _fake.word()
-    category_name_2 = _fake.word()
-
-    category_1 = crud.categories.create(db, obj_in=CategoryCreate(name=category_name_1))
-    category_2 = crud.categories.create(db, obj_in=CategoryCreate(name=category_name_2))
-
-    assert category_1.name == category_name_1
-    assert category_2.name == category_name_2
-
-    # Create a new quote with the newly created categories
-    quote_in = QuoteCreate(
-        text=text,
-        tags=tags,
-        categories=[category_1.id, category_2.id],
+    quote, cat1, cat2 = create_random_quote_with_random_category(
+        db, text=text, tags=tags
     )
 
-    quote = crud.quote.create(db, obj_in=quote_in)
-
+    assert quote
+    assert cat1
+    assert cat2
     assert quote.text == text
     assert quote.tags == tags
-
-    # Fetch the quote again from the database to make sure categories were correctly assigned
-    quote_db = crud.quote.get(db, id=quote.id)
-    category_ids = [category.id for category in quote_db.categories]
-    assert category_1.id in category_ids
-    assert category_2.id in category_ids
+    assert cat1 in quote.categories
+    assert cat2 in quote.categories
 
 
 def test_create_quote_with_author_and_categories(db: Session) -> None:
     text = _fake.sentence()
     tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
-    author_name = _fake.name()
-    category_name_1 = _fake.word()
-    category_name_2 = _fake.word()
 
-    author = crud.author.create(db, obj_in=AuthorCreate(name=author_name))
-    assert author.name == author_name
-
-    category_1 = crud.categories.create(db, obj_in=CategoryCreate(name=category_name_1))
-    assert category_1.name == category_name_1
-
-    category_2 = crud.categories.create(db, obj_in=CategoryCreate(name=category_name_2))
-    assert category_2.name == category_name_2
-
-    quote_in = QuoteCreate(
-        text=text,
-        tags=tags,
-        author_id=author.id,
-        categories=[category_1.id, category_2.id],
+    quote, author, cat1, cat2 = create_random_quote_with_random_author_and_category(
+        db, text=text, tags=tags
     )
 
-    quote = crud.quote.create(db, obj_in=quote_in)
-    assert quote.text == text
-    assert quote.tags == tags
-    assert quote.author_id == author.id
+    assert quote
+    assert author
+    assert cat1
+    assert cat2
 
-    quote_db = crud.quote.get(db, id=quote.id)
-    assert quote_db
-    assert quote_db.author_id == author.id
-    category_ids = [category.id for category in quote_db.categories]
-    assert category_1.id in category_ids
-    assert category_2.id in category_ids
+    assert quote.authors == author
+    assert cat1 in quote.categories
+    assert cat2 in quote.categories
 
 
 def test_get_quote(db: Session) -> None:
@@ -116,161 +79,123 @@ def test_get_quote(db: Session) -> None:
 
 def test_get_quote_with_author_and_categories(db: Session):
     text = _fake.sentence()
-    author_name = _fake.name()
-    author_in = AuthorCreate(name=author_name)
-    author = crud.author.create(db, obj_in=author_in)
-    assert author
-    assert author.name == author_name
-
-    category_name = _fake.name()
-    categories_in = CategoryCreate(name=category_name)
-    categories = crud.categories.create(db, obj_in=categories_in)
-    assert categories
-    assert categories.name == category_name
-
     tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
-    quote_in = QuoteCreate(
-        text=text,
-        tags=tags,
-        author_id=author.id,
-        categories_id=categories.id,
+
+    quote, author, cat1, cat2 = create_random_quote_with_random_author_and_category(
+        db, text=text, tags=tags
     )
-    quote = crud.quote.create(db, obj_in=quote_in)
-    quote_2 = crud.quote.get(db, id=quote.id)
-    assert quote_2
-    assert quote.text == quote_2.text
-    assert jsonable_encoder(quote) == jsonable_encoder(quote_2)
 
+    retrieved_quote = crud.quote.get(db, id=quote.id)
 
-def test_get_quote_by_author_name(db: Session):
-    text = _fake.sentence()
-    author_name = _fake.name()
-    author_in = AuthorCreate(name=author_name)
-    author = crud.author.create(db, obj_in=author_in)
+    assert quote
+    assert retrieved_quote
     assert author
-    assert author.name == author_name
+    assert cat1
+    assert cat2
 
-    tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
-    quote_in = QuoteCreate(text=text, tags=tags, author_id=author.id)
-    quote = crud.quote.create(db, obj_in=quote_in)
-    quote_2 = crud.quote.get_by_author_id(db, author_id=author.id)
-    assert quote_2
-    assert quote.text == quote_2.text
-    assert jsonable_encoder(quote) == jsonable_encoder(quote_2)
+    assert retrieved_quote.authors == author
+    assert cat1 in retrieved_quote.categories
+    assert cat2 in retrieved_quote.categories
+    assert quote.text == retrieved_quote.text
+    assert jsonable_encoder(quote) == jsonable_encoder(retrieved_quote)
+
+
+def test_get_quote_by_author_id(db: Session):
+    text = _fake.sentence()
+    created_quote, created_author = create_random_quote_with_random_author(
+        db, text=text
+    )
+    retrieved_quote = crud.quote.get_by_author_id(db, author_id=created_author.id)
+    assert created_quote.text == text
+    assert created_quote.authors == created_author
+    assert retrieved_quote
+    assert created_quote.text == retrieved_quote.text
+    assert jsonable_encoder(created_quote) == jsonable_encoder(retrieved_quote)
 
 
 def test_get_quote_by_categories_id(db: Session):
-    category_name = _fake.name()
-    categories_in = CategoryCreate(name=category_name)
-    categories = crud.categories.create(db, obj_in=categories_in)
-    assert categories.name == category_name
+    text = _fake.sentence()
+    tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
+    created_quote, cat1, cat2 = create_random_quote_with_random_category(
+        db, text=text, tags=tags
+    )
 
-    quote_text = _fake.sentence()
-    tags = ",".join(_fake.word() for _ in range(3))
-    quote_in = QuoteCreate(text=quote_text, tags=tags, categories=[categories.id])
-    quote = crud.quote.create(db, obj_in=quote_in)
-    quote_2 = crud.quote.get_by_categories_id(db, categories_id=categories.id)
-    assert quote.text == quote_2.text
-    assert jsonable_encoder(quote) == jsonable_encoder(quote_2)
+    retrieved_quote1 = crud.quote.get_by_categories_id(db, categories_id=cat1.id)
+    retrieved_quote2 = crud.quote.get_by_categories_id(db, categories_id=cat2.id)
+    assert created_quote.text == retrieved_quote1.text
+    assert created_quote.text == retrieved_quote2.text
+    assert cat1 in retrieved_quote1.categories
+    assert cat2 in retrieved_quote1.categories
+    assert cat1 in retrieved_quote2.categories
+    assert cat2 in retrieved_quote2.categories
+    assert jsonable_encoder(created_quote) == jsonable_encoder(retrieved_quote1)
+    assert jsonable_encoder(created_quote) == jsonable_encoder(retrieved_quote2)
 
 
 def test_update_quote(db: Session):
-    author_name = _fake.name()
-    author_in = AuthorCreate(name=author_name)
-    author = crud.author.create(db, obj_in=author_in)
-
-    category_name = _fake.name()
-    categories_in = CategoryCreate(name=category_name)
-    categories = crud.categories.create(db, obj_in=categories_in)
-
     text = _fake.sentence()
-    tags = f"{_fake.words()},{_fake.words()},{_fake.words()}"
-    quote_in = QuoteCreate(
-        text=text,
-        tags=tags,
-        author_id=author.id,
-        categories_id=categories.id,
+    tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
+    created_quote = create_random_quote(db, text=text, tags=tags)
+    retrieved_quote = crud.quote.get(db, id=created_quote.id)
+    assert retrieved_quote.text == text
+    assert retrieved_quote.tags == tags
+
+    updated_text = _fake.sentence()
+    updated_tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
+    updated_quote = update_random_quote(
+        db, retrieved_quote=retrieved_quote, text=updated_text, tags=updated_tags
     )
-    quote_created = crud.quote.create(db, obj_in=quote_in)
-
-    quote_retrieved = crud.quote.get(db, id=quote_created.id)
-
-    new_text = _fake.sentence()
-    new_tags = f"{_fake.words()},{_fake.words()},{_fake.words()}"
-    quote_update_in = QuoteUpdate(
-        text=new_text,
-        tags=new_tags,
-        author_id=author.id,
-        categories_id=categories.id,
-    )
-    quote_updated = crud.quote.update(
-        db, db_obj=quote_retrieved, obj_in=quote_update_in
-    )
-
-    assert quote_updated.text != text
-    assert quote_updated.tags != tags
+    assert updated_quote.text == updated_text
+    assert updated_quote.tags == updated_tags
+    assert updated_quote.id == retrieved_quote.id
 
 
-def test_update_author_and_categories(db: Session):
-    def get_author(author_id):
-        return crud.author.get(db, id=author_id)
-
-    def get_category(category_id):
-        return crud.categories.get(db, id=category_id)
-
-    def create_quote_with_author_and_category(author_id, category_id):
-        author = get_author(author_id)
-        category = get_category(category_id)
-        return create_quote(author.id, [category.id])
-
-    def create_quote_update_with_author_and_category(author_id, category_id):
-        new_author = get_author(author_id)
-        new_category = get_category(category_id)
-        return create_quote_update(author_id=new_author.id, cat=[new_category.id])
-
-    def assert_quote_updated(
-        quote_updated, quote_update_in, new_author_id, new_category_id
-    ):
-        assert quote_updated.text == quote_update_in.text
-        assert quote_updated.tags == quote_update_in.tags
-        assert quote_updated.authors.id == new_author_id
-        assert quote_updated.categories[0].id == new_category_id
-
-    author_id = 1
-    category_id = 1
-
-    quote_in = create_quote_with_author_and_category(author_id, category_id)
-    quote_created = crud.quote.create(db, obj_in=quote_in)
-    quote_retrieved = crud.quote.get(db, id=quote_created.id)
-
-    new_author_id = 3
-    new_category_id = 3
-
-    quote_update_in = create_quote_update_with_author_and_category(
-        new_author_id, new_category_id
-    )
-    quote_updated = crud.quote.update(
-        db, db_obj=quote_retrieved, obj_in=quote_update_in
-    )
-
-    assert_quote_updated(quote_updated, quote_update_in, new_author_id, new_category_id)
-
-
-def create_quote(author_id: int, cat: List[Category]) -> QuoteCreate:
+def test_update_quote_author(db: Session):
     text = _fake.sentence()
-    tags = f"{_fake.words()},{_fake.words()},{_fake.words()}"
-    return QuoteCreate(text=text, tags=tags, author_id=author_id, categories=cat)
+    tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
+    created_quote = create_random_quote(db, text=text, tags=tags)
+    retrieved_quote = crud.quote.get(db, id=created_quote.id)
+    assert retrieved_quote.text == text
+    assert retrieved_quote.tags == tags
 
-
-def create_quote_update(author_id: int, cat: List[Category]) -> QuoteUpdate:
-    new_text = _fake.sentence()
-    new_tags = f"{_fake.words()},{_fake.words()},{_fake.words()}"
-    return QuoteUpdate(
-        text=new_text,
-        tags=new_tags,
-        author_id=author_id,
-        categories=cat,
+    updated_text = _fake.sentence()
+    updated_tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
+    updated_quote, created_author = update_random_quote_with_random_author(
+        db, retrieved_quote=retrieved_quote, text=updated_text, tags=updated_tags
     )
+    assert updated_quote.text == updated_text
+    assert updated_quote.tags == updated_tags
+    assert updated_quote.id == retrieved_quote.id
+    assert updated_quote.authors == created_author
+    assert retrieved_quote.authors == created_author
+
+
+def test_update_quote_with_random_author_and_categories(db: Session):
+    text = _fake.sentence()
+    tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
+
+    created_result = create_random_quote_with_random_author_and_category(
+        db, text=text, tags=tags
+    )
+    created_quote, created_author, created_cat1, created_cat2 = created_result
+    retrieved_quote = crud.quote.get(db, id=created_quote.id)
+    assert retrieved_quote.text == text
+    assert retrieved_quote.tags == tags
+
+    updated_text = _fake.sentence()
+    updated_tags = f"{_fake.word()},{_fake.word()},{_fake.word()}"
+    updated_result = update_random_quote_with_random_author_and_categories(
+        db, retrieved_quote=retrieved_quote, text=updated_text, tags=updated_tags
+    )
+
+    updated_quote, updated_author, updated_cat1, updated_cat2 = updated_result
+
+    assert updated_quote.text == updated_text
+    assert updated_quote.tags == updated_tags
+    assert updated_quote.id == retrieved_quote.id
+    assert updated_quote.authors == updated_author
+    assert updated_cat1 in updated_quote.categories
+    assert updated_cat2 in updated_quote.categories
 
 
 def test_delete_quote(db: Session):
