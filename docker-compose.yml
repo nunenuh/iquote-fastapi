@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+
+  iquote-fastapi-db:
+    image: 'bitnami/postgresql:14.8.0'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=iquote-fastapi
+    ports:
+      - '5234:5432'
+    # networks:
+    #   - app-tier
+
+  iquote-fastapi-web:
+    build:
+      context: .
+      dockerfile: docker/images/Dockerfile.dev
+      # args:
+      #   GITHUB_LOGIN: ${GITHUB_LOGIN}
+      #   GITHUB_TOKEN: ${GITHUB_TOKEN}
+    image: nunenuh/iquote-fastapi:dev
+    ports:
+      - '8000:8000'
+    depends_on:
+      - iquote-fastapi-db
+    environment:
+      - POSTGRES_HOST=localhost
+      - POSTGRES_PORT=5234
+      - POSTGRES_USER=erfan
+      - POSTGRES_PASS=dummyp4ss
+      - POSTGRES_DB=iquote_fastapi
+    # networks:
+    #   - app-tier

@@ -9,14 +9,14 @@ run-server:
 
 run-test:
 ifdef dst
-	PYTHONPATH=src python -m pytest $(dst) -v
+	PYTHONPATH=.:src python -m pytest $(dst) -v
 else
-	PYTHONPATH=src python -m pytest -v
+	PYTHONPATH=.:src python -m pytest -v
 endif
 
 
 run-test-cov:
-	PYTHONPATH=src pytest --cov=src --cov-report=term-missing --cov-report=xml
+	@PYTHONPATH=.:src:$PYTHONPATH pytest --cov=src --cov-report=xml
 
 db-migrate:
 	PYTHONPATH=src alembic revision --autogenerate

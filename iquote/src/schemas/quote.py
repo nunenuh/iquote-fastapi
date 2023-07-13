@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from schemas.categories import Categories as CategoriesSchema
+from schemas.category import Category as CategorySchema
 from schemas.user import User as UserSchema
 
 
@@ -11,7 +11,7 @@ class QuoteBase(BaseModel):
     text: str
     tags: Optional[str] = None
     author_id: Optional[int] = None
-    categories: List[CategoriesSchema] = []
+    categories: List[CategorySchema] = []
 
 
 # Properties to receive via API on creation

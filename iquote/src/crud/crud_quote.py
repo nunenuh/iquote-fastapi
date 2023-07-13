@@ -3,7 +3,9 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from crud.base import CRUDBase
-from models.quote import Author, Categories, Quote
+from models.author import Author
+from models.category import Category
+from models.quote import Quote
 from schemas.quote import QuoteCreate, QuoteUpdate, QuoteWithLike
 from schemas.user import User
 
@@ -26,7 +28,7 @@ class CRUDQuote(CRUDBase[Quote, QuoteCreate, QuoteUpdate]):
         return (
             db.query(Quote)
             .join(Quote.categories)
-            .filter(Categories.id == categories_id)
+            .filter(Category.id == categories_id)
             .first()
         )
 
@@ -36,7 +38,7 @@ class CRUDQuote(CRUDBase[Quote, QuoteCreate, QuoteUpdate]):
         return (
             db.query(Quote)
             .join(Quote.categories)
-            .filter(Categories.name.ilike(f"%{categories_name}%"))
+            .filter(Category.name.ilike(f"%{categories_name}%"))
             .all()
         )
 
@@ -44,7 +46,7 @@ class CRUDQuote(CRUDBase[Quote, QuoteCreate, QuoteUpdate]):
         # retrieve or create categories first
         category_objs = []
         for category_id in obj_in.categories:
-            category = db.query(Categories).filter(Categories.id == category_id).first()
+            category = db.query(Category).filter(Category.id == category_id).first()
             if category:
                 category_objs.append(category)
 
@@ -64,11 +66,9 @@ class CRUDQuote(CRUDBase[Quote, QuoteCreate, QuoteUpdate]):
         # retrieve or create categories first
         category_objs = []
         for category_in in obj_in.categories:
-            category = (
-                db.query(Categories).filter(Categories.id == category_in.id).first()
-            )
+            category = db.query(Category).filter(Category.id == category_in.id).first()
             if not category:
-                category = Categories(name=category_in.name)
+                category = Category(name=category_in.name)
                 db.add(category)
                 db.commit()
                 db.refresh(category)
@@ -99,9 +99,7 @@ class CRUDQuote(CRUDBase[Quote, QuoteCreate, QuoteUpdate]):
         # Update categories
         category_objs = []
         for categories_id in obj_in.categories:
-            category = (
-                db.query(Categories).filter(Categories.id == categories_id).first()
-            )
+            category = db.query(Category).filter(Category.id == categories_id).first()
             if category:
                 category_objs.append(category)
 

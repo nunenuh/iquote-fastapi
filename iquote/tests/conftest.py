@@ -5,9 +5,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from starlette.testclient import TestClient
 
-from src.core.config import settings
-from src.db.session import SessionLocal
-from src.main import create_application  # updated
+from core.config import settings
+from db.session import SessionLocal
+from main import create_application  # updated
 from tests.utils.user import authentication_token_from_email
 from tests.utils.utils import get_superuser_token_headers
 
@@ -40,29 +40,3 @@ def normal_user_token_headers(client: TestClient, db: Session) -> Dict[str, str]
     return authentication_token_from_email(
         client=client, email=settings.EMAIL_TEST_USER, db=db
     )
-
-
-# @pytest.fixture(scope="module")
-# def test_app():
-#     # set up
-#     app = create_application()
-#     app.dependency_overrides[get_settings] = get_settings_override
-#     with TestClient(app) as test_client:
-#         # testing
-#         yield test_client
-
-
-# @pytest.fixture(scope="module")
-# def test_app_with_db():
-#     app = create_application()
-#     app.dependency_overrides[get_settings] = get_settings_override
-#     register_tortoise(
-#         app,
-#         db_url=os.environ.get("DATABASE_TEST_URL"),
-#         modules={"models": ["app.models.tortoise"]},
-#         generate_schemas=True,
-#         add_exception_handlers=True,
-#     )
-
-#     with TestClient(app) as test_client:
-#         yield test_client

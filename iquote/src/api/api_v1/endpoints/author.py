@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.Author])
-def read_author(
+async def read_author(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
@@ -26,7 +26,7 @@ def read_author(
 
 
 @router.get("/{author_id}", response_model=schemas.Author)
-def read_author_by_id(
+async def read_author_by_id(
     author_id: int,
     # current_user: models.User = Depends(deps.get_current_active_user),
     db: Session = Depends(deps.get_db),
@@ -45,7 +45,7 @@ def read_author_by_id(
 
 
 @router.post("/", response_model=schemas.Author)
-def create_author(
+async def create_author(
     *,
     db: Session = Depends(deps.get_db),
     author_in: schemas.AuthorCreate,
@@ -62,7 +62,7 @@ def create_author(
 
 
 @router.put("/{author_id}", response_model=schemas.Author)
-def update_author(
+async def update_author(
     *,
     db: Session = Depends(deps.get_db),
     author_id: int,
@@ -80,7 +80,7 @@ def update_author(
 
 
 @router.delete("/{author_id}", response_model=schemas.Author)
-def delete_author(
+async def delete_author(
     *,
     db: Session = Depends(deps.get_db),
     author_id: int,

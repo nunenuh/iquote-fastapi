@@ -1,0 +1,36 @@
+# The application
+FROM bitnami/python:3.10 AS app
+
+# Create a new user 'nonroot'
+RUN useradd -r -u 1001 nonroot
+RUN chown 1001:1001 /app
+
+RUN mkdir -p /home/nonroot/.cache/pip \
+    && mkdir -p /home/nonroot/.local \
+    && chown -R nonroot:nonroot /home/nonroot/.cache \
+    && chown -R nonroot:nonroot /home/nonroot/.local
+
+USER nonroot
+
+RUN pip install --upgrade pip
+RUN pip install poetry --user
+
+USER root
+RUN ln -s /home/nonroot/.local/bin/poetry /usr/bin/poetry
+RUN ln -s /home/nonroot/.local/bin/poetry /usr/local/bin/poetry
+RUN chown 1001:1001 /usr/bin/poetry
+RUN chown 1001:1001 /usr/local/bin/poetry
+
+USER nonroot
+
+WORKDIR /app
+
+# Copy in the build image
+COPY --chown=1001:1001 iquote/ /app
+
+# RUN poetry install --no-interaction --no-ansi --no-root --no-dev
+RUN ~/.local/bin/poetry install --no-interaction --no-ansi --no-root --no-dev
+
+ENV PYTHONPATH=.:src
+# Run the application
+CMD ["poetry","run","uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

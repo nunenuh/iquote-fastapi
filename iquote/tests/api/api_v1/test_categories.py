@@ -7,12 +7,12 @@ from core.config import settings
 _fake = faker.Faker()
 
 
-def test_create_categories(
+def test_create_category(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
     data = {"name": _fake.name()}
     response = client.post(
-        f"{settings.API_V1_STR}/categories",
+        f"{settings.API_V1_STR}/category",
         headers=superuser_token_headers,
         json=data,
     )
@@ -22,13 +22,13 @@ def test_create_categories(
     assert "id" in content
 
 
-def test_update_categories(
+def test_update_category(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
-    categories_id = 1
+    category_id = 1
     data = {"name": _fake.name()}
     response = client.put(
-        f"{settings.API_V1_STR}/categories/{categories_id}",
+        f"{settings.API_V1_STR}/category/{category_id}",
         headers=superuser_token_headers,
         json=data,
     )
@@ -36,14 +36,14 @@ def test_update_categories(
     content = response.json()
     assert content["name"] == data["name"]
     assert "id" in content
-    assert content["id"] == categories_id
+    assert content["id"] == category_id
 
 
-def test_get_categories_list(
+def test_get_category_list(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
     r = client.get(
-        f"{settings.API_V1_STR}/categories"
+        f"{settings.API_V1_STR}/category"
         # headers=normal_user_token_headers
     )
 
@@ -55,38 +55,38 @@ def test_get_categories_list(
     assert rjson[0]["id"]
 
 
-def test_get_categories(
+def test_get_category(
     client: TestClient,
 ) -> None:
-    categories_id = 1
+    category_id = 1
     r = client.get(
-        f"{settings.API_V1_STR}/categories/{categories_id}"
+        f"{settings.API_V1_STR}/category/{category_id}"
         # headers=normal_user_token_headers
     )
 
     assert r.status_code == 200
     rjson = r.json()
     assert rjson
-    assert rjson["id"] == categories_id
+    assert rjson["id"] == category_id
 
 
 def test_get_quote_category_by_name(
     client: TestClient,
 ) -> None:
-    categories_id = 1
+    category_id = 1
     r = client.get(
-        f"{settings.API_V1_STR}/categories/{categories_id}"
+        f"{settings.API_V1_STR}/category/{category_id}"
         # headers=normal_user_token_headers
     )
 
     assert r.status_code == 200
     rjson = r.json()
     assert rjson
-    assert rjson["id"] == categories_id
+    assert rjson["id"] == category_id
 
     category_name = rjson["name"]
     r = client.get(
-        f"{settings.API_V1_STR}/categories/name/{category_name}"
+        f"{settings.API_V1_STR}/category/name/{category_name}"
         # headers=normal_user_token_headers
     )
 
@@ -101,7 +101,7 @@ def test_get_quote_category_by_parent_id(
 ) -> None:
     data1 = {"name": _fake.name()}
     response = client.post(
-        f"{settings.API_V1_STR}/categories",
+        f"{settings.API_V1_STR}/category",
         headers=superuser_token_headers,
         json=data1,
     )
@@ -112,7 +112,7 @@ def test_get_quote_category_by_parent_id(
 
     data2 = {"name": _fake.name(), "parent_id": content1["id"]}
     response = client.post(
-        f"{settings.API_V1_STR}/categories",
+        f"{settings.API_V1_STR}/category",
         headers=superuser_token_headers,
         json=data2,
     )
@@ -123,7 +123,7 @@ def test_get_quote_category_by_parent_id(
 
     parent_id = content1["id"]
     r = client.get(
-        f"{settings.API_V1_STR}/categories/parent/{parent_id}"
+        f"{settings.API_V1_STR}/category/parent/{parent_id}"
         # headers=normal_user_token_headers
     )
 
@@ -134,12 +134,12 @@ def test_get_quote_category_by_parent_id(
     assert rjson[0]["parent_id"] == parent_id
 
 
-def test_delete_categories(
+def test_delete_category(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
     data = {"name": _fake.name()}
     response = client.post(
-        f"{settings.API_V1_STR}/categories",
+        f"{settings.API_V1_STR}/category",
         headers=superuser_token_headers,
         json=data,
     )
@@ -148,12 +148,12 @@ def test_delete_categories(
     assert content["name"] == data["name"]
     assert "id" in content
 
-    categories_id = content["id"]
+    category_id = content["id"]
     response = client.delete(
-        f"{settings.API_V1_STR}/categories/{categories_id}",
+        f"{settings.API_V1_STR}/category/{category_id}",
         headers=superuser_token_headers,
     )
     assert response.status_code == 200
     content = response.json()
     assert "id" in content
-    assert content["id"] == categories_id
+    assert content["id"] == category_id

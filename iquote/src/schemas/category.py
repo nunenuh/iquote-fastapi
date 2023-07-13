@@ -4,31 +4,31 @@ from pydantic import BaseModel, ConfigDict
 
 
 # Shared properties
-class CategoriesBase(BaseModel):
+class CategoryBase(BaseModel):
     name: str
     parent_id: Optional[int] = None
 
 
 # Properties to receive via API on creation
-class CategoriesCreate(CategoriesBase):
+class CategoryCreate(CategoryBase):
     pass
 
 
 # Properties to receive via API on update
-class CategoriesUpdate(CategoriesBase):
+class CategoryUpdate(CategoryBase):
     pass
 
 
-class CategoriesInDBBase(CategoriesBase):
+class CategoryInDBBase(CategoryBase):
     id: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
 
 
 # Additional properties to return via API
-class Categories(CategoriesInDBBase):
+class Category(CategoryInDBBase):
     pass
 
 
 # Additional properties stored in DB
-class CategoriesInDB(CategoriesInDBBase):
+class CategoryInDB(CategoryInDBBase):
     pass

@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Union
 from sqlalchemy.orm import Session
 
 from crud.base import CRUDBase
-from models.quote import Author
+from models.author import Author
 from schemas.author import AuthorCreate, AuthorUpdate
 
 

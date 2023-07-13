@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.Quote])
-def read_quotes(
+async def read_quotes(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
@@ -25,7 +25,7 @@ def read_quotes(
 
 
 @router.get("/{quote_id}", response_model=schemas.Quote)
-def read_quote_by_id(
+async def read_quote_by_id(
     quote_id: int,
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -37,7 +37,7 @@ def read_quote_by_id(
 
 
 @router.get("/by/author/{author_id}", response_model=schemas.Quote)
-def read_quote_by_author_id(
+async def read_quote_by_author_id(
     author_id: int,
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -49,7 +49,7 @@ def read_quote_by_author_id(
 
 
 @router.get("/by/author/name/{author_name}", response_model=List[schemas.Quote])
-def read_quote_by_author_name(
+async def read_quote_by_author_name(
     author_name: str,
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -61,7 +61,7 @@ def read_quote_by_author_name(
 
 
 @router.get("/by/categories/{categories_id}", response_model=schemas.Quote)
-def read_quote_by_categories_id(
+async def read_quote_by_categories_id(
     categories_id: int,
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -73,7 +73,7 @@ def read_quote_by_categories_id(
 
 
 @router.get("/by/categories/name/{categories_name}", response_model=List[schemas.Quote])
-def read_quote_by_categories_name(
+async def read_quote_by_categories_name(
     categories_name: str,
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -85,7 +85,7 @@ def read_quote_by_categories_name(
 
 
 @router.post("/", response_model=schemas.Quote)
-def create_quote(
+async def create_quote(
     *,
     db: Session = Depends(deps.get_db),
     quote_in: schemas.QuoteCreate,
@@ -97,7 +97,7 @@ def create_quote(
 
 # create for me servive for quote like
 @router.put("/{quote_id}/like", response_model=schemas.QuoteWithLike)
-def like_quote(
+async def like_quote(
     *,
     db: Session = Depends(deps.get_db),
     quote_id: int,
@@ -114,7 +114,7 @@ def like_quote(
 
 
 @router.put("/{quote_id}/unlike", response_model=schemas.QuoteWithLike)
-def unlike_quote(
+async def unlike_quote(
     *,
     db: Session = Depends(deps.get_db),
     quote_id: int,
@@ -131,7 +131,7 @@ def unlike_quote(
 
 
 @router.put("/{quote_id}", response_model=schemas.Quote)
-def update_quote(
+async def update_quote(
     *,
     db: Session = Depends(deps.get_db),
     quote_id: int,
@@ -149,7 +149,7 @@ def update_quote(
 
 
 @router.delete("/{quote_id}", response_model=schemas.Quote)
-def delete_quote(
+async def delete_quote(
     *,
     db: Session = Depends(deps.get_db),
     quote_id: int,
